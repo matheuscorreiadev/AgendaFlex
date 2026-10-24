@@ -128,3 +128,85 @@ function copyPublicLink() {
   navigator.clipboard.writeText('https://agendaflex.app/matheus-dev');
   alert('Link do seu perfil copiado para a área de transferência!');
 }
+
+/* ==========================================================================
+   LÓGICA DO PAINEL ADMIN (MÉTRICAS, TABELA, SERVIÇOS)
+   ========================================================================== */
+function updateMetrics() {
+  const totalApps = appointments.filter(a => a.status !== 'Cancelado').length;
+  const totalRevenue = appointments
+    .filter(a => a.status !== 'Cancelado')
+    .reduce((acc, curr) => acc + (Number(curr.price) || 0), 0);
+  
+  const uniqueClients = new Set(appointments.map(a => a.phone)).size;
+
+  document.getElementById('stat-total').innerText = totalApps;
+  document.getElementById('stat-revenue').innerText = `R$ ${totalRevenue.toFixed(2).replace('.', ',')}`;
+  document.getElementById('stat-clients').innerText = uniqueClients;
+}
+
+function renderAppointments() {
+  const tbody = document.getElementById('appointments-list');
+  const selectedDate = document.getElementById('filter-date').value;
+  const selectedStatus = document.getElementById('filter-status').value;
+
+  let filtered = appointments.filter(a => {
+    const matchDate = !selectedDate || a.date === selectedDate;
+    const matchStatus = selectedStatus === 'all' || a.status === selectedStatus;
+    return matchDate && matchStatus;
+  });
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6" class="py-8 text-center text-slate-500">
+          Nenhum agendamento encontrado para os filtros selecionados.
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(a => {
+    let statusClass = 'bg-slate-700 text-slate-300';
+    if (a.status === 'Confirmado') statusClass = 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
+    if (a.status === 'Concluído') statusClass = 'bg-blue-500/10 text-blue-400 border border-blue-500/20';
+    if (a.status === 'Cancelado') statusClass = 'bg-rose-500/10 text-rose-400 border border-rose-500/20';
+
+    return `
+      <tr class="hover:bg-slate-800/40 transition">
+        <td class="py-3.5 px-4 font-semibold text-white">${a.time}</td>
+        <td class="py-3.5 px-4">
+          <div class="font-medium text-white">${a.clientName}</div>
+          <div class="text-xs text-slate-400">${a.phone}</div>
+        </td>
+        <td class="py-3.5 px-4">${a.serviceTitle}</td>
+        <td class="py-3.5 px-4 font-semibold text-emerald-400">R$ ${Number(a.price).toFixed(2).replace('.', ',')}</td>
+        <td class="py-3.5 px-4">
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusClass}">
+            ${a.status}
+          </span>
+        </td>
+        <td class="py-3.5 px-4 text-right space-x-1">
+          <a href="https://wa.me/55${a.phone.replace(/\D/g,'')}?text=Olá%20${encodeURIComponent(a.clientName)},%20confirmamos%20seu%20agendamento%20para%20${a.date}%20às%20${a.time}!" target="_blank" class="inline-flex items-center p-1.5 bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/30 rounded-lg transition" title="Enviar WhatsApp">
+            <i data-lucide="message-circle" class="w-4 h-4"></i>
+          </a>
+          <button onclick="changeAppointmentStatus('${a.id}', 'Concluído')" class="p-1.5 bg-blue-600/20 text-blue-400 hover:bg-blue-600/30 rounded-lg transition" title="Marcar Concluído">
+            <i data-lucide="check" class="w-4 h-4"></i>
+          </button>
+          <button onclick="changeAppointmentStatus('${a.id}', 'Cancelado')" class="p-1.5 bg-rose-600/20 text-rose-400 hover:bg-rose-600/30 rounded-lg transition" title="Cancelar">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  if (window.lucide) lucide.createIcons();
+}
+
+function changeAppointmentStatus(id, newStatus) {
+  appointments = appointments.map(a => a.id === id ? { ...a, status: newStatus } : a);
+  saveDataToStorage();
+  refreshAllViews();
+}
