@@ -348,3 +348,133 @@ function saveManualAppointment() {
   refreshAllViews();
   closeNewAppointmentModal();
 }
+
+/* ==========================================================================
+   LÓGICA DA VISÃO DO CLIENTE (BOOKING WIZARD EM 3 PASSOS)
+   ========================================================================== */
+function renderClientServices() {
+  const container = document.getElementById('client-services-list');
+  container.innerHTML = services.map(s => `
+    <div onclick="selectClientService('${s.id}')" class="p-4 rounded-xl bg-slate-900 border border-slate-700 hover:border-indigo-500 cursor-pointer transition flex justify-between items-center group">
+      <div>
+        <h4 class="font-bold text-white group-hover:text-indigo-400 transition">${s.title}</h4>
+        <p class="text-xs text-slate-400 mt-0.5">${s.desc || ''}</p>
+        <span class="text-xs text-slate-500 mt-1 block">${s.duration} minutos</span>
+      </div>
+      <div class="text-right">
+        <span class="text-base font-extrabold text-emerald-400">R$ ${Number(s.price).toFixed(2).replace('.', ',')}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function selectClientService(serviceId) {
+  clientBookingState.service = services.find(s => s.id === serviceId);
+  goToClientStep(2);
+}
+
+function goToClientStep(step) {
+  document.getElementById('client-step-1').classList.add('hidden');
+  document.getElementById('client-step-2').classList.add('hidden');
+  document.getElementById('client-step-3').classList.add('hidden');
+  document.getElementById('client-step-success').classList.add('hidden');
+
+  // Atualizar barra de progresso
+  const step1Ind = document.getElementById('step-ind-1');
+  const step2Ind = document.getElementById('step-ind-2');
+  const step3Ind = document.getElementById('step-ind-3');
+
+  step1Ind.className = "text-slate-500 flex items-center space-x-1";
+  step2Ind.className = "text-slate-500 flex items-center space-x-1";
+  step3Ind.className = "text-slate-500 flex items-center space-x-1";
+
+  if (step >= 1) step1Ind.className = "text-indigo-400 font-bold flex items-center space-x-1";
+  if (step >= 2) step2Ind.className = "text-indigo-400 font-bold flex items-center space-x-1";
+  if (step >= 3) step3Ind.className = "text-indigo-400 font-bold flex items-center space-x-1";
+
+  if (step === 1) {
+    document.getElementById('client-step-1').classList.remove('hidden');
+  } else if (step === 2) {
+    document.getElementById('client-step-2').classList.remove('hidden');
+    renderTimeSlots();
+  } else if (step === 3) {
+    document.getElementById('client-step-3').classList.remove('hidden');
+    document.getElementById('summary-service').innerText = clientBookingState.service.title;
+    document.getElementById('summary-datetime').innerText = `${clientBookingState.date} às ${clientBookingState.time}`;
+    document.getElementById('summary-price').innerText = `R$ ${Number(clientBookingState.service.price).toFixed(2).replace('.', ',')}`;
+  } else if (step === 'success') {
+    document.getElementById('client-step-success').classList.remove('hidden');
+  }
+}
+
+function renderTimeSlots() {
+  const dateVal = document.getElementById('client-booking-date').value;
+  clientBookingState.date = dateVal;
+
+  const container = document.getElementById('time-slots-container');
+  if (!dateVal) {
+    container.innerHTML = `<p class="text-xs text-slate-500 col-span-3">Selecione uma data para ver os horários.</p>`;
+    return;
+  }
+
+  // Gera slots das 08:00 às 17:00 de hora em hora
+  const availableHours = ['08:00', '09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
+  
+  // Buscar horários já agendados na mesma data
+  const bookedTimes = appointments
+    .filter(a => a.date === dateVal && a.status !== 'Cancelado')
+    .map(a => a.time);
+
+  container.innerHTML = availableHours.map(time => {
+    const isBooked = bookedTimes.includes(time);
+    if (isBooked) {
+      return `<button disabled class="py-2 bg-slate-800 text-slate-600 rounded-lg text-xs font-semibold cursor-not-allowed border border-slate-800">${time} (Ocupado)</button>`;
+    }
+    return `<button onclick="selectTimeSlot('${time}')" class="py-2 bg-slate-900 hover:bg-indigo-600 text-slate-200 hover:text-white rounded-lg text-xs font-semibold border border-slate-700 transition">${time}</button>`;
+  }).join('');
+}
+
+function selectTimeSlot(time) {
+  clientBookingState.time = time;
+  goToClientStep(3);
+}
+
+function confirmClientBooking() {
+  const name = document.getElementById('client-input-name').value.trim();
+  const phone = document.getElementById('client-input-phone').value.trim();
+  const notes = document.getElementById('client-input-notes').value.trim();
+
+  if (!name || !phone) {
+    alert('Por favor, informe seu nome e telefone.');
+    return;
+  }
+
+  clientBookingState.clientName = name;
+  clientBookingState.phone = phone;
+  clientBookingState.notes = notes;
+
+  // Registrar novo agendamento
+  appointments.push({
+    id: 'a_' + Date.now(),
+    clientName: name,
+    phone: phone,
+    serviceId: clientBookingState.service.id,
+    serviceTitle: clientBookingState.service.title,
+    price: clientBookingState.service.price,
+    date: clientBookingState.date,
+    time: clientBookingState.time,
+    status: 'Confirmado'
+  });
+
+  saveDataToStorage();
+  refreshAllViews();
+  goToClientStep('success');
+}
+
+function resetClientWizard() {
+  clientBookingState = { service: null, date: '', time: '', clientName: '', phone: '', notes: '' };
+  document.getElementById('client-input-name').value = '';
+  document.getElementById('client-input-phone').value = '';
+  document.getElementById('client-input-notes').value = '';
+  goToClientStep(1);
+}
