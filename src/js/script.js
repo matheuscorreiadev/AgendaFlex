@@ -290,3 +290,61 @@ function deleteService(id) {
     refreshAllViews();
   }
 }
+
+/* CONFIGURAÇÃO DE HORÁRIOS */
+function saveScheduleSettings() {
+  scheduleSettings.start = document.getElementById('setting-start').value;
+  scheduleSettings.end = document.getElementById('setting-end').value;
+  scheduleSettings.breakStart = document.getElementById('setting-break-start').value;
+  scheduleSettings.breakEnd = document.getElementById('setting-break-end').value;
+
+  saveDataToStorage();
+  alert('Horários salvos com sucesso!');
+}
+
+/* AGENDAMENTO MANUAL (MODAL ADMIN) */
+function openNewAppointmentModal() {
+  const modal = document.getElementById('modal-new-appointment');
+  const select = document.getElementById('manual-service-id');
+  
+  select.innerHTML = services.map(s => `<option value="${s.id}">${s.title} (R$ ${s.price})</option>`).join('');
+  document.getElementById('manual-date').value = getTodayFormatted();
+  document.getElementById('manual-time').value = '10:00';
+  
+  modal.classList.remove('hidden');
+}
+
+function closeNewAppointmentModal() {
+  document.getElementById('modal-new-appointment').classList.add('hidden');
+}
+
+function saveManualAppointment() {
+  const name = document.getElementById('manual-client-name').value.trim();
+  const phone = document.getElementById('manual-client-phone').value.trim();
+  const serviceId = document.getElementById('manual-service-id').value;
+  const date = document.getElementById('manual-date').value;
+  const time = document.getElementById('manual-time').value;
+
+  if (!name || !phone || !date || !time) {
+    alert('Preencha todos os campos do agendamento.');
+    return;
+  }
+
+  const service = services.find(s => s.id === serviceId);
+
+  appointments.push({
+    id: 'a_' + Date.now(),
+    clientName: name,
+    phone: phone,
+    serviceId: service.id,
+    serviceTitle: service.title,
+    price: service.price,
+    date: date,
+    time: time,
+    status: 'Confirmado'
+  });
+
+  saveDataToStorage();
+  refreshAllViews();
+  closeNewAppointmentModal();
+}
