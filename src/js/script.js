@@ -210,3 +210,83 @@ function changeAppointmentStatus(id, newStatus) {
   saveDataToStorage();
   refreshAllViews();
 }
+
+/* CRUD DE SERVIÇOS */
+function renderServices() {
+  const container = document.getElementById('services-grid');
+  container.innerHTML = services.map(s => `
+    <div class="bg-slate-800 border border-slate-700/60 rounded-2xl p-5 space-y-3 flex flex-col justify-between">
+      <div>
+        <div class="flex justify-between items-start">
+          <h4 class="font-bold text-white text-base">${s.title}</h4>
+          <span class="text-xs bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2 py-0.5 rounded-full font-medium">${s.duration} min</span>
+        </div>
+        <p class="text-xs text-slate-400 mt-2">${s.desc || 'Sem descrição.'}</p>
+      </div>
+      <div class="flex justify-between items-center pt-2 border-t border-slate-700/50">
+        <span class="text-lg font-extrabold text-emerald-400">R$ ${Number(s.price).toFixed(2).replace('.', ',')}</span>
+        <div class="space-x-1">
+          <button onclick="openServiceModal('${s.id}')" class="text-xs bg-slate-700 hover:bg-slate-600 px-2.5 py-1.5 rounded-lg text-slate-200">Editar</button>
+          <button onclick="deleteService('${s.id}')" class="text-xs bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 px-2.5 py-1.5 rounded-lg">Excluir</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openServiceModal(serviceId = null) {
+  const modal = document.getElementById('modal-service');
+  modal.classList.remove('hidden');
+
+  if (serviceId) {
+    const s = services.find(x => x.id === serviceId);
+    document.getElementById('modal-service-title').innerText = 'Editar Serviço';
+    document.getElementById('service-id-edit').value = s.id;
+    document.getElementById('service-input-title').value = s.title;
+    document.getElementById('service-input-price').value = s.price;
+    document.getElementById('service-input-duration').value = s.duration;
+    document.getElementById('service-input-desc').value = s.desc || '';
+  } else {
+    document.getElementById('modal-service-title').innerText = 'Novo Serviço';
+    document.getElementById('service-id-edit').value = '';
+    document.getElementById('service-input-title').value = '';
+    document.getElementById('service-input-price').value = '';
+    document.getElementById('service-input-duration').value = '45';
+    document.getElementById('service-input-desc').value = '';
+  }
+}
+
+function closeServiceModal() {
+  document.getElementById('modal-service').classList.add('hidden');
+}
+
+function saveService() {
+  const id = document.getElementById('service-id-edit').value;
+  const title = document.getElementById('service-input-title').value.trim();
+  const price = parseFloat(document.getElementById('service-input-price').value);
+  const duration = parseInt(document.getElementById('service-input-duration').value);
+  const desc = document.getElementById('service-input-desc').value.trim();
+
+  if (!title || isNaN(price) || isNaN(duration)) {
+    alert('Por favor, preencha os campos obrigatórios.');
+    return;
+  }
+
+  if (id) {
+    services = services.map(s => s.id === id ? { ...s, title, price, duration, desc } : s);
+  } else {
+    services.push({ id: 's_' + Date.now(), title, price, duration, desc });
+  }
+
+  saveDataToStorage();
+  refreshAllViews();
+  closeServiceModal();
+}
+
+function deleteService(id) {
+  if (confirm('Tem certeza que deseja excluir este serviço?')) {
+    services = services.filter(s => s.id !== id);
+    saveDataToStorage();
+    refreshAllViews();
+  }
+}
