@@ -41,3 +41,287 @@
       </div>
     </div>
   </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+
+    <!-- ========================================== -->
+    <!-- VIEW 1: PAINEL ADMINISTRATIVO (PROFISSIONAL) -->
+    <!-- ========================================== -->
+    <div id="view-admin" class="space-y-6">
+
+      <!-- Sub-header do Admin -->
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-800/50 p-4 rounded-2xl border border-slate-800">
+        <div>
+          <h2 class="text-xl font-bold text-white">Bem-vindo, Matheus 👋</h2>
+          <p class="text-sm text-slate-400">Gerencie seus agendamentos, clientes e horários de atendimento.</p>
+        </div>
+        <div class="flex items-center space-x-3">
+          <div class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-300 font-mono truncate max-w-xs">
+            agendaflex.app/matheus-dev
+          </div>
+          <button onclick="copyPublicLink()" class="bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-400 border border-indigo-500/30 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center space-x-1 transition">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+            <span>Copiar Link</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Cards de Métricas -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700/60 shadow-sm">
+          <div class="flex items-center justify-between text-slate-400 mb-2">
+            <span class="text-xs font-medium uppercase tracking-wider">Agendamentos Mês</span>
+            <div class="p-2 bg-indigo-500/10 text-indigo-400 rounded-lg"><i data-lucide="calendar-days" class="w-4 h-4"></i></div>
+          </div>
+          <p id="stat-total" class="text-2xl font-bold text-white">0</p>
+          <p class="text-xs text-emerald-400 mt-1 flex items-center"><i data-lucide="trending-up" class="w-3 h-3 mr-1"></i> +12% em relação ao mês anterior</p>
+        </div>
+
+        <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700/60 shadow-sm">
+          <div class="flex items-center justify-between text-slate-400 mb-2">
+            <span class="text-xs font-medium uppercase tracking-wider">Faturamento Previsto</span>
+            <div class="p-2 bg-emerald-500/10 text-emerald-400 rounded-lg"><i data-lucide="dollar-sign" class="w-4 h-4"></i></div>
+          </div>
+          <p id="stat-revenue" class="text-2xl font-bold text-white">R$ 0,00</p>
+          <p class="text-xs text-slate-400 mt-1">Calculado sobre agendamentos confirmados</p>
+        </div>
+
+        <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700/60 shadow-sm">
+          <div class="flex items-center justify-between text-slate-400 mb-2">
+            <span class="text-xs font-medium uppercase tracking-wider">Clientes Atendidos</span>
+            <div class="p-2 bg-purple-500/10 text-purple-400 rounded-lg"><i data-lucide="users" class="w-4 h-4"></i></div>
+          </div>
+          <p id="stat-clients" class="text-2xl font-bold text-white">0</p>
+          <p class="text-xs text-purple-400 mt-1">Base ativa de clientes</p>
+        </div>
+
+        <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700/60 shadow-sm">
+          <div class="flex items-center justify-between text-slate-400 mb-2">
+            <span class="text-xs font-medium uppercase tracking-wider">Taxa de Presença</span>
+            <div class="p-2 bg-blue-500/10 text-blue-400 rounded-lg"><i data-lucide="check-circle-2" class="w-4 h-4"></i></div>
+          </div>
+          <p id="stat-presence" class="text-2xl font-bold text-white">100%</p>
+          <p class="text-xs text-slate-400 mt-1">Lembretes WhatsApp ativos</p>
+        </div>
+      </div>
+
+      <!-- Navegação Interna do Admin (Tabs) -->
+      <div class="border-b border-slate-800 flex space-x-6 text-sm font-medium">
+        <button onclick="switchAdminTab('agenda')" id="tab-btn-agenda" class="pb-3 border-b-2 border-indigo-500 text-indigo-400 flex items-center space-x-2">
+          <i data-lucide="calendar-check" class="w-4 h-4"></i>
+          <span>Agenda & Agendamentos</span>
+        </button>
+        <button onclick="switchAdminTab('services')" id="tab-btn-services" class="pb-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center space-x-2">
+          <i data-lucide="scissors" class="w-4 h-4"></i>
+          <span>Serviços & Preços</span>
+        </button>
+        <button onclick="switchAdminTab('settings')" id="tab-btn-settings" class="pb-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center space-x-2">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          <span>Horários de Atendimento</span>
+        </button>
+      </div>
+
+      <!-- TAB 1: AGENDA -->
+      <div id="admin-tab-agenda" class="space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div class="flex items-center space-x-3">
+            <input type="date" id="filter-date" onchange="renderAppointments()" class="bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <select id="filter-status" onchange="renderAppointments()" class="bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <option value="all">Todos os Status</option>
+              <option value="Confirmado">Confirmados</option>
+              <option value="Concluído">Concluídos</option>
+              <option value="Cancelado">Cancelados</option>
+            </select>
+          </div>
+          <button onclick="openNewAppointmentModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center justify-center space-x-2 shadow-lg shadow-indigo-600/30 transition">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>Novo Agendamento Manual</span>
+          </button>
+        </div>
+
+        <!-- Tabela de Agendamentos -->
+        <div class="bg-slate-800 rounded-2xl border border-slate-700/60 overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm text-slate-300">
+              <thead class="bg-slate-900/60 text-xs uppercase text-slate-400 font-semibold border-b border-slate-700">
+                <tr>
+                  <th class="py-3.5 px-4">Horário</th>
+                  <th class="py-3.5 px-4">Cliente</th>
+                  <th class="py-3.5 px-4">Serviço</th>
+                  <th class="py-3.5 px-4">Valor</th>
+                  <th class="py-3.5 px-4">Status</th>
+                  <th class="py-3.5 px-4 text-right">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="appointments-list" class="divide-y divide-slate-700/50">
+                <!-- Inserido dinamicamente via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: SERVIÇOS -->
+      <div id="admin-tab-services" class="hidden space-y-4">
+        <div class="flex justify-between items-center">
+          <h3 class="text-lg font-bold text-white">Serviços Oferecidos</h3>
+          <button onclick="openServiceModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center space-x-2">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>Adicionar Serviço</span>
+          </button>
+        </div>
+        <div id="services-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Cards de Serviços via JS -->
+        </div>
+      </div>
+
+      <!-- TAB 3: HORÁRIOS DE ATENDIMENTO -->
+      <div id="admin-tab-settings" class="hidden bg-slate-800 p-6 rounded-2xl border border-slate-700/60 space-y-6 max-w-2xl">
+        <h3 class="text-lg font-bold text-white">Configuração da Agenda</h3>
+        <div class="space-y-4">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 mb-1">Horário de Início</label>
+              <input type="time" id="setting-start" value="08:00" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 mb-1">Horário de Término</label>
+              <input type="time" id="setting-end" value="18:00" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm">
+            </div>
+          </div>
+          
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 mb-1">Pausa para Almoço (Opcional)</label>
+            <div class="grid grid-cols-2 gap-4">
+              <input type="time" id="setting-break-start" value="12:00" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm">
+              <input type="time" id="setting-break-end" value="13:00" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm">
+            </div>
+          </div>
+
+          <button onclick="saveScheduleSettings()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-xl text-sm font-semibold flex items-center space-x-2">
+            <i data-lucide="save" class="w-4 h-4"></i>
+            <span>Salvar Configurações</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- VIEW 2: VISÃO DO CLIENTE (BOOKING WIZARD) -->
+    <!-- ========================================== -->
+    <div id="view-client" class="hidden max-w-xl mx-auto space-y-6 pt-4">
+
+      <!-- Header do Perfil do Profissional -->
+      <div class="text-center space-y-2">
+        <div class="w-20 h-20 rounded-full bg-indigo-600 border-4 border-slate-800 mx-auto flex items-center justify-center text-2xl font-bold text-white shadow-xl">
+          MC
+        </div>
+        <h2 class="text-2xl font-bold text-white">Matheus Correia</h2>
+        <p class="text-sm text-slate-400">Desenvolvimento Web & Consultoria de Software</p>
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+          ● Agenda Aberta
+        </span>
+      </div>
+
+      <!-- Card Principal do Wizard de Agendamento -->
+      <div class="bg-slate-800 border border-slate-700/70 rounded-2xl p-6 shadow-2xl space-y-6">
+        
+        <!-- Indicador de Passos -->
+        <div class="flex items-center justify-between border-b border-slate-700/70 pb-4 text-xs font-medium">
+          <div id="step-ind-1" class="text-indigo-400 flex items-center space-x-1 font-bold">
+            <span class="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs">1</span>
+            <span>Serviço</span>
+          </div>
+          <div class="w-8 h-px bg-slate-700"></div>
+          <div id="step-ind-2" class="text-slate-500 flex items-center space-x-1">
+            <span class="w-5 h-5 rounded-full bg-slate-700 text-slate-300 flex items-center justify-center text-xs">2</span>
+            <span>Data & Hora</span>
+          </div>
+          <div class="w-8 h-px bg-slate-700"></div>
+          <div id="step-ind-3" class="text-slate-500 flex items-center space-x-1">
+            <span class="w-5 h-5 rounded-full bg-slate-700 text-slate-300 flex items-center justify-center text-xs">3</span>
+            <span>Seus Dados</span>
+          </div>
+        </div>
+
+        <!-- PASSO 1: Seleção de Serviço -->
+        <div id="client-step-1" class="space-y-4">
+          <h3 class="text-base font-bold text-white">Selecione o Serviço Desejado:</h3>
+          <div id="client-services-list" class="space-y-3">
+            <!-- Serviços via JS -->
+          </div>
+        </div>
+
+        <!-- PASSO 2: Seleção de Data e Horário -->
+        <div id="client-step-2" class="hidden space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="text-base font-bold text-white">Escolha a Data e o Horário:</h3>
+            <button onclick="goToClientStep(1)" class="text-xs text-indigo-400 hover:underline">Voltar</button>
+          </div>
+          
+          <div>
+            <label class="block text-xs text-slate-400 mb-1">Data do Atendimento</label>
+            <input type="date" id="client-booking-date" onchange="renderTimeSlots()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-sm focus:ring-2 focus:ring-indigo-500">
+          </div>
+
+          <div>
+            <label class="block text-xs text-slate-400 mb-2">Horários Disponíveis</label>
+            <div id="time-slots-container" class="grid grid-cols-3 gap-2">
+              <p class="text-xs text-slate-500 col-span-3">Selecione uma data para ver os horários.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- PASSO 3: Dados do Cliente e Confirmação -->
+        <div id="client-step-3" class="hidden space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="text-base font-bold text-white">Informe seus dados para contato:</h3>
+            <button onclick="goToClientStep(2)" class="text-xs text-indigo-400 hover:underline">Voltar</button>
+          </div>
+
+          <!-- Resumo da Seleção -->
+          <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700 text-xs space-y-1">
+            <div class="flex justify-between text-slate-300"><span class="text-slate-400">Serviço:</span> <span id="summary-service" class="font-semibold text-white">-</span></div>
+            <div class="flex justify-between text-slate-300"><span class="text-slate-400">Data & Hora:</span> <span id="summary-datetime" class="font-semibold text-white">-</span></div>
+            <div class="flex justify-between text-slate-300"><span class="text-slate-400">Valor Total:</span> <span id="summary-price" class="font-semibold text-emerald-400">-</span></div>
+          </div>
+
+          <div class="space-y-3">
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">Nome Completo *</label>
+              <input type="text" id="client-input-name" placeholder="Ex: Ana Silva" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-sm focus:ring-2 focus:ring-indigo-500">
+            </div>
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">WhatsApp / Telefone *</label>
+              <input type="tel" id="client-input-phone" placeholder="(71) 99999-9999" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-sm focus:ring-2 focus:ring-indigo-500">
+            </div>
+            <div>
+              <label class="block text-xs text-slate-400 mb-1">Observações (Opcional)</label>
+              <textarea id="client-input-notes" rows="2" placeholder="Algum detalhe específico?" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-sm focus:ring-2 focus:ring-indigo-500"></textarea>
+            </div>
+          </div>
+
+          <button onclick="confirmClientBooking()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl shadow-lg shadow-emerald-600/30 flex items-center justify-center space-x-2 transition">
+            <i data-lucide="check" class="w-5 h-5"></i>
+            <span>Confirmar Agendamento</span>
+          </button>
+        </div>
+
+        <!-- TELA DE SUCESSO -->
+        <div id="client-step-success" class="hidden text-center py-6 space-y-4">
+          <div class="w-16 h-16 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto border border-emerald-500/30">
+            <i data-lucide="check-circle-2" class="w-10 h-10"></i>
+          </div>
+          <h3 class="text-xl font-bold text-white">Agendamento Realizado!</h3>
+          <p class="text-sm text-slate-300">Enviamos a confirmação do seu horário. Entraremos em contato via WhatsApp para detalhes.</p>
+          <button onclick="resetClientWizard()" class="bg-slate-700 hover:bg-slate-600 text-white px-5 py-2 rounded-xl text-xs font-semibold transition">
+            Fazer Novo Agendamento
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
