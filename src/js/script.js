@@ -86,3 +86,45 @@ function refreshAllViews() {
   updateMetrics();
   if (window.lucide) lucide.createIcons();
 }
+
+/* ==========================================================================
+   CONTROLE DE NAVEGAÇÃO E VIEWS (MODO ADMIN / MODO CLIENTE)
+   ========================================================================== */
+function switchView(view) {
+  const adminView = document.getElementById('view-admin');
+  const clientView = document.getElementById('view-client');
+  const btnAdmin = document.getElementById('btn-mode-admin');
+  const btnClient = document.getElementById('btn-mode-client');
+
+  if (view === 'admin') {
+    adminView.classList.remove('hidden');
+    clientView.classList.add('hidden');
+    btnAdmin.className = "flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-medium transition bg-indigo-600 text-white shadow-md";
+    btnClient.className = "flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-medium transition text-slate-400 hover:text-white";
+  } else {
+    adminView.classList.add('hidden');
+    clientView.classList.remove('hidden');
+    btnClient.className = "flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-medium transition bg-indigo-600 text-white shadow-md";
+    btnAdmin.className = "flex items-center space-x-2 px-3 py-1.5 rounded-lg text-xs font-medium transition text-slate-400 hover:text-white";
+  }
+}
+
+function switchAdminTab(tab) {
+  const tabs = ['agenda', 'services', 'settings'];
+  tabs.forEach(t => {
+    const el = document.getElementById(`admin-tab-${t}`);
+    const btn = document.getElementById(`tab-btn-${t}`);
+    if (t === tab) {
+      el.classList.remove('hidden');
+      btn.className = "pb-3 border-b-2 border-indigo-500 text-indigo-400 flex items-center space-x-2";
+    } else {
+      el.classList.add('hidden');
+      btn.className = "pb-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center space-x-2";
+    }
+  });
+}
+
+function copyPublicLink() {
+  navigator.clipboard.writeText('https://agendaflex.app/matheus-dev');
+  alert('Link do seu perfil copiado para a área de transferência!');
+}
