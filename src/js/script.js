@@ -57,3 +57,32 @@ function getTodayFormatted() {
   const today = new Date();
   return today.toISOString().split('T')[0];
 }
+
+/* ==========================================================================
+   INICIALIZAÇÃO DA PÁGINA
+   ========================================================================== */
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('filter-date').value = getTodayFormatted();
+  document.getElementById('client-booking-date').value = getTodayFormatted();
+  
+  saveDataToStorage();
+  refreshAllViews();
+  
+  if (window.lucide) {
+    lucide.createIcons();
+  }
+});
+
+function saveDataToStorage() {
+  localStorage.setItem('af_services', JSON.stringify(services));
+  localStorage.setItem('af_appointments', JSON.stringify(appointments));
+  localStorage.setItem('af_settings', JSON.stringify(scheduleSettings));
+}
+
+function refreshAllViews() {
+  renderAppointments();
+  renderServices();
+  renderClientServices();
+  updateMetrics();
+  if (window.lucide) lucide.createIcons();
+}
